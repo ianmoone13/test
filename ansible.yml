@@ -1,0 +1,21 @@
+- hosts: all
+  become: true
+  vars_files:
+    - vars.yml
+  
+  pre_tasks:
+  - name: Update apt cache if needed.
+    apt: update_cache=yes cache_valid_time=3600
+
+  tasks:
+    - name: Mysql cli and server install
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - mysql-server
+        - python-mysqldb
+
+    - name: Remove the MySQL test database.
+      mysql_db: db=test state=absent
+
+    - name: Create a database
+      mysql_db: "db={{ domain }} state=present"
