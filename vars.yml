@@ -1,1 +1,5 @@
-domain: "test_com"
+domain: "test.local"
+database: "test"
+dbuser: "wpuser"
+dbpass: "wppass"
+unarc_path: "/var/www"
