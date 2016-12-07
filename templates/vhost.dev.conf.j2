@@ -1,0 +1,11 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost 
+    ServerName {{ domain }}.local 
+    ServerAlias www.{{ domain }}.local 
+    DocumentRoot {{ www_path }} 
+
+    <Directory "{{ www_path }}">
+            Options FollowSymLinks Indexes
+            AllowOverride All
+    </Directory>
+</VirtualHost>
