@@ -2,7 +2,9 @@
   become: true
   vars_files:
     - vars.yml
-  
+  vars:
+    www_path: "{{ unarc_path }}/wordpress"
+
   pre_tasks:
   - name: Update apt cache if needed.
     apt: update_cache=yes cache_valid_time=3600
@@ -18,14 +20,14 @@
       mysql_db: db=test state=absent
 
     - name: Create a database
-      mysql_db: "db={{ domain }} state=present"
+      mysql_db: "db={{ database }} state=present"
 
     - name: Setup password for database
       mysql_user:
           name: "{{ dbuser }}"
           password: "{{ dbpass }}"
           host: "localhost"
-          priv: "{{ domain }}.*:ALL"
+          priv: "{{ database }}.*:ALL"
           state: present
 
     - name: Install Apache
@@ -47,26 +49,52 @@
         - php-pear
         - libapache2-mod-php
 
+  #______________donwload wordpress________
+    - unarchive:
+          src: "https://wordpress.org/latest.tar.gz"
+          dest: "{{ www_path }}"
+          remote_src: yes
+
+    - name: get salt
+      local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+      register: "salt"
+      become: no
+      become_method: sudo
+
+    - name: Add wp config
+      template:
+        src: "templates/wp.conf.j2"
+        dest: "{{ unarc_path }}/wordpress/wp-config.php"
+        owner: root
+        group: root
+        mode: 0644
+
 
   # _______________Apache config_____________
     - name: Add Apache virtualhost
       template:
         src: "templates/vhost.dev.conf.j2"
-        dest: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+        dest: "/etc/apache2/sites-available/{{ domain }}.conf"
         owner: root
         group: root
         mode: 0644
-      notify: restart apache2 
 
     - name: Symlink virtualhost to sites-enabled.
       file:
-        src: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
-        dest: "/etc/apache2/sites-enabled/{{ domain }}.dev.conf"
+        src: "/etc/apache2/sites-available/{{ domain }}.conf"
+        dest: "/etc/apache2/sites-enabled/{{ domain }}.conf"
         state: link
-      notify: restart apache2
 
     - name: Remove default virtualhost file.
       file:
-        path: "/etc/apache2/sites-enabled/000-default"
+        path: "/etc/apache2/sites-enabled/000-default.conf"
         state: absent
-      notify: restart apache2
+
+    - name: Deactivate default vhost
+      command: a2dissite 000-default
+
+    - name: Ensure Apache is running
+      service:
+        name: apache2
+        state: restarted
+        enabled: yes
