@@ -19,3 +19,54 @@
 
     - name: Create a database
       mysql_db: "db={{ domain }} state=present"
+
+    - name: Setup password for database
+      mysql_user:
+          name: "{{ dbuser }}"
+          password: "{{ dbpass }}"
+          host: "localhost"
+          priv: "{{ domain }}.*:ALL"
+          state: present
+
+    - name: Install Apache
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - apache2
+
+    - name: Install PHP5
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - php
+        - php-common
+        - php-mysql
+        - php-cli
+        - php-curl
+        - php-gd
+        - php-dev
+        - php-mcrypt
+        - php-pear
+        - libapache2-mod-php
+
+
+  # _______________Apache config_____________
+    - name: Add Apache virtualhost
+      template:
+        src: "templates/vhost.dev.conf.j2"
+        dest: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart apache2 
+
+    - name: Symlink virtualhost to sites-enabled.
+      file:
+        src: "/etc/apache2/sites-available/{{ domain }}.dev.conf"
+        dest: "/etc/apache2/sites-enabled/{{ domain }}.dev.conf"
+        state: link
+      notify: restart apache2
+
+    - name: Remove default virtualhost file.
+      file:
+        path: "/etc/apache2/sites-enabled/000-default"
+        state: absent
+      notify: restart apache2
