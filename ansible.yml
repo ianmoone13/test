@@ -9,7 +9,7 @@
   pre_tasks:
   - raw: sudo apt-get -y install python-simplejson
   - action: setup
-  
+
   - name: Update apt cache if needed.
     apt: update_cache=yes cache_valid_time=3600
 
@@ -56,7 +56,7 @@
   #______________donwload wordpress________
     - unarchive:
           src: "https://wordpress.org/latest.tar.gz"
-          dest: "{{ www_path }}"
+          dest: "{{ unarc_path }}"
           remote_src: yes
 
     - name: get salt
