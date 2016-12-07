@@ -4,8 +4,12 @@
     - vars.yml
   vars:
     www_path: "{{ unarc_path }}/wordpress"
+  gather_facts: false
 
   pre_tasks:
+  - raw: sudo apt-get -y install python-simplejson
+  - action: setup
+  
   - name: Update apt cache if needed.
     apt: update_cache=yes cache_valid_time=3600
 
