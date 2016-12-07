@@ -5,10 +5,10 @@
 2.	After install, you need need opeh terminal, go to project directory
 	- file vars.yml
 		```
-		domain: "test.local" 	- edit your domain
-		database: "test"		- edit database name
-		dbuser: "wpuser"		- edit database user
-		dbpass: "wppass"		- edit database password
+		domain: "test.local" 			- edit your domain
+		database: "test"				- edit database name
+		dbuser: "wpuser"				- edit database user
+		dbpass: "wppass"				- edit database password
 		unarc_path: "/var/www"			- edit path for site location
 
 		```
